@@ -1,35 +1,26 @@
 #!/usr/bin/python3
-"""Export data in the CSV format."""
+"""Exporta datos en formato CSV."""
 
+import csv
 import requests
 import sys
-import csv
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        print(f"missing employee id as argument")
-        sys.exit(1)
+    if len(sys.argv) == 2:
+        URL = "https://jsonplaceholder.typicode.com"
+        ID_EMPLEADO = sys.argv[1]
 
-    URL = "https://jsonplaceholder.typicode.com"
-    EMPLOYEE_ID = sys.argv[1]
+        respuesta = requests.get(f"{URL}/users/{ID_EMPLEADO}/todos", params={
+            "_expand": "user"})
+        datos = respuesta.json()
 
-    EMPLOYEE_TODOS = requests.get(f"{URL}/users/{EMPLOYEE_ID}/todos",
-                                  params={"_expand": "user"})
-    data = EMPLOYEE_TODOS.json()
+        if datos:
+            NOMBRE_EMPLEADO = datos[0]["user"]["name"]
 
-    EMPLOYEE_NAME = data[0]["user"]["name"]
-    TOTAL_NUMBER_OF_TASKS = len(data)
-    NUMBER_OF_DONE_TASKS = 0
-    TASK_TITLE = []
-
-    for task in data:
-        if task["completed"]:
-            NUMBER_OF_DONE_TASKS += 1
-            TASK_TITLE.append(task["title"])
-
-    with open(f"{EMPLOYEE_ID}.csv", "w", newline="",
-              encoding="utf-8") as csvfile:
-        csv_writer = csv.writer(csvfile, quoting=csv.QUOTE_NONNUMERIC)
-        for title in TASK_TITLE:
-            csv_writer.writerow([EMPLOYEE_ID, EMPLOYEE_NAME, "True", title])
+            with open(f"{ID_EMPLEADO}.csv", "w", newline="",
+                      encoding="utf-8") as csvfile:
+                csv_writer = csv.writer(csvfile, quoting=csv.QUOTE_NONNUMERIC)
+                for tarea in datos:
+                    csv_writer.writerow([ID_EMPLEADO, NOMBRE_EMPLEADO, tarea[
+                        "completed"], tarea["title"]])
