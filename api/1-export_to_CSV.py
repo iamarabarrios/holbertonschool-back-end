@@ -43,11 +43,10 @@ def get_employee_todo_progress(employee_id):
 
     with urlopen(api_url) as response:
         user_data = json.load(response)
+        employee_name = user_data.get("username")
 
     with urlopen(todo_url) as response:
         todo_data = json.load(response)
-
-    employee_name = user_data.get("name")
 
     tasks = [
         {"username": employee_name, "completed": task["completed"],
@@ -58,6 +57,17 @@ def get_employee_todo_progress(employee_id):
     return tasks
 
 
+def validate_task_count(file_name, expected_count):
+    with open(file_name, mode="r") as csv_file:
+        csv_reader = csv.reader(csv_file)
+        task_count = sum(1 for row in csv_reader) - 1
+
+    if task_count == expected_count:
+        print(f"Number of tasks in CSV: OK")
+    else:
+        print(f"Number of tasks in CSV: Incorrect")
+
+
 if __name__ == "__main__":
     if len(sys.argv) != 2:
         print("Usage: python3 script_name.py <employee_id>")
@@ -65,3 +75,5 @@ if __name__ == "__main__":
         employee_id = int(sys.argv[1])
         tasks = get_employee_todo_progress(employee_id)
         export_to_csv(employee_id, tasks)
+
+        validate_task_count(f"{employee_id}.csv", len(tasks))
