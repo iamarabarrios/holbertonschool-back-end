@@ -4,6 +4,7 @@
 import json
 import sys
 from urllib.request import urlopen
+from urllib.error import URLError
 
 
 def export_to_json(employee_id, tasks):
@@ -29,17 +30,23 @@ def get_employee_todo_progress(employee_id):
     todo_url = f"https://jsonplaceholder.typicode.com/todos?" \
                f"userId={employee_id}"
 
-    with urlopen(api_url) as response:
-        user_data = json.load(response)
+    try:
+        with urlopen(api_url) as response:
+            user_data = json.load(response)
 
-    with urlopen(todo_url) as response:
-        todo_data = json.load(response)
+        with urlopen(todo_url) as response:
+            todo_data = json.load(response)
+    except URLError as e:
+        print(f"Error connecting to API: {e}")
+        return []
+
+    if not todo_data:
+        print(f"No tasks found for employee {employee_id}")
+        return []
 
     employee_name = user_data.get("name")
-
     tasks = [
-        {"task": task["title"], "completed": task["completed"],
-         "username": employee_name}
+        {"task": task["title"], "completed": task["completed"], "username": employee_name}
         for task in todo_data
     ]
 
@@ -52,4 +59,9 @@ if __name__ == "__main__":
     else:
         employee_id = int(sys.argv[1])
         tasks = get_employee_todo_progress(employee_id)
-        export_to_json(employee_id, tasks)
+
+        if tasks:
+            export_to_json(employee_id, tasks)
+            print("All tasks found: OK")
+        else:
+            print("No tasks to export.")
