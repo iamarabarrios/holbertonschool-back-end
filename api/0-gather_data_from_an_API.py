@@ -7,6 +7,7 @@ from urllib.request import urlopen
 
 
 def get_employee_todo_progress(employee_id):
+    """Todo progress"""
     api_url = f"https://jsonplaceholder.typicode.com/users/{employee_id}"
     base_url = "https://jsonplaceholder.typicode.com/todos?"
     todo_url = f"{base_url}userId={employee_id}"

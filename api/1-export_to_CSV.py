@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-"""Export data in the CSV format."""
+"""Returns information about his/her TODO list progress using urllib."""
 
 import csv
 import json
@@ -8,60 +8,52 @@ from urllib.request import urlopen
 
 
 def export_to_csv(employee_id, tasks):
-    """
-    Export TODO list progress for a given employee to a CSV file.
-    Args:
-        employee_id: Employee ID.
-        tasks (list): List of tasks for the employee.
-    """
+    """Export to csv"""
     file_name = f"{employee_id}.csv"
     headers = ["USER_ID", "USERNAME", "TASK_COMPLETED_STATUS", "TASK_TITLE"]
 
     with open(file_name, mode="w", newline="") as csv_file:
-        csv_writer = csv.writer(csv_file, quoting=csv.QUOTE_ALL)
+        csv_writer = csv.writer(csv_file, quoting=csv.QUOTE_NONNUMERIC)
         csv_writer.writerow(headers)
 
         for task in tasks:
-            task_row = [
+            row = [
                 str(employee_id),
                 task["username"],
                 str(task["completed"]),
                 task["title"]
             ]
-            csv_writer.writerow(task_row)
+            csv_writer.writerow(row)
 
     print(f"Data exported to {file_name}")
 
 
 def get_employee_todo_progress(employee_id):
-    """
-    Args: Employee ID, int
-    Returns: List of tasks for the employee.
-    """
+    """Todo progress"""
     api_url = f"https://jsonplaceholder.typicode.com/users/{employee_id}"
-    todo_url = f"https://jsonplaceholder.typicode.com/todos?" \
-               f"userId={employee_id}"
+    base_url = "https://jsonplaceholder.typicode.com/todos?"
+    todo_url = f"{base_url}userId={employee_id}"
 
     with urlopen(api_url) as response:
         user_data = json.load(response)
-        employee_name = user_data.get("username")
 
     with urlopen(todo_url) as response:
         todo_data = json.load(response)
 
+    employee_name = user_data.get("username")
+
     tasks = [
-        {"username": employee_name, "completed": task["completed"],
-         "title": task["title"]}
+        {"username": employee_name, "completed": task.get("completed"),
+         "title": task.get("title")}
         for task in todo_data
     ]
 
     return tasks
 
 
-if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        print("Usage: python3 script_name.py <employee_id>")
-    else:
-        employee_id = int(sys.argv[1])
-        tasks = get_employee_todo_progress(employee_id)
-        export_to_csv(employee_id, tasks)
+if len(sys.argv) != 2:
+    print("Usage: python3 script_name.py <employee_id>")
+else:
+    employee_id = int(sys.argv[1])
+    tasks = get_employee_todo_progress(employee_id)
+    export_to_csv(employee_id, tasks)
