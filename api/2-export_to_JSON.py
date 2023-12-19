@@ -46,7 +46,8 @@ def get_employee_todo_progress(employee_id):
 
     employee_name = user_data.get("name")
     tasks = [
-        {"task": task["title"], "completed": task["completed"], "username": employee_name}
+        {"task": task["title"], "completed": task["completed"], "username":
+            employee_name}
         for task in todo_data
     ]
 
@@ -62,6 +63,5 @@ if __name__ == "__main__":
 
         if tasks:
             export_to_json(employee_id, tasks)
-            print("All tasks found: OK")
         else:
             print("No tasks to export.")
