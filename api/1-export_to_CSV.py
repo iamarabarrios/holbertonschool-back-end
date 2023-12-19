@@ -10,14 +10,15 @@ from urllib.request import urlopen
 def export_to_csv(employee_id, tasks):
     """
     Export TODO list progress for a given employee to a CSV file.
-    Args: Employee ID.
+    Args:
+        employee_id: Employee ID.
         tasks (list): List of tasks for the employee.
     """
     file_name = f"{employee_id}.csv"
     headers = ["USER_ID", "USERNAME", "TASK_COMPLETED_STATUS", "TASK_TITLE"]
 
     with open(file_name, mode="w", newline="") as csv_file:
-        csv_writer = csv.writer(csv_file)
+        csv_writer = csv.writer(csv_file, quoting=csv.QUOTE_ALL)
         csv_writer.writerow(headers)
 
         for task in tasks:
