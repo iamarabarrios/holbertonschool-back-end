@@ -1,63 +1,23 @@
 #!/usr/bin/python3
-"""Export data in the JSON format."""
+"""Exports TODO list progress in JSON format."""
 
+import requests
+from sys import argv
 import json
-import sys
-from urllib.request import urlopen
-from urllib.error import URLError
-
-
-def export_to_json(employee_id, tasks):
-    """
-    Args: Employee ID, int
-    List of tasks for the employee.
-    """
-    file_name = f"{employee_id}.json"
-    data = {str(employee_id): tasks}
-
-    with open(file_name, "w") as json_file:
-        json.dump(data, json_file, indent=2)
-
-    print(f"Data exported to {file_name}")
-
-
-def get_employee_todo_progress(employee_id):
-    """
-    Args: Employee ID
-    Returns: List of tasks for the employee.
-    """
-    api_url = f"https://jsonplaceholder.typicode.com/users/{employee_id}"
-    todo_url = f"https://jsonplaceholder.typicode.com/todos?" \
-               f"userId={employee_id}"
-
-    with urlopen(api_url) as response:
-        user_data = json.load(response)
-
-    with urlopen(todo_url) as response:
-        todo_data = json.load(response)
-
-    if not todo_data:
-        print(f"No tasks found for employee {employee_id}")
-        return []
-
-    employee_name = user_data.get("name")
-    tasks = [
-        {"task": task["title"], "completed": task["completed"], "username":
-            employee_name}
-        for task in todo_data
-    ]
-
-    return tasks
-
 
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        print("Usage: python3 script_name.py <employee_id>")
-    else:
-        employee_id = int(sys.argv[1])
-        tasks = get_employee_todo_progress(employee_id)
+    api_url = "https://jsonplaceholder.typicode.com/"
 
-        if tasks:
-            export_to_json(employee_id, tasks)
-        else:
-            print("No tasks to export.")
+    user_id = argv[1]
+
+    user_data = requests.get(api_url + f"users/{user_id}").json()
+    user_tasks = requests.get(api_url + f"users/{user_id}/todos").json()
+
+    user_completed_tasks = [{"task": task["title"], "completed": task[
+        "completed"], "username": user_data["username"]
+                             } for task in user_tasks]
+
+    output_data = {user_id: user_completed_tasks}
+
+    with open(f"{user_id}.json", "w") as json_file:
+        json.dump(output_data, json_file, indent=2)

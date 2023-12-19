@@ -1,47 +1,33 @@
 #!/usr/bin/python3
-"""Export data in the JSON format."""
+"""Script to export data in the JSON format.."""
 
+import requests
 import json
-import sys
-from urllib.request import urlopen
+from sys import argv
 
 
-def get_employee_todo_progress(employee_id):
-    """
-    Args: Employee ID for which to retrieve progress.
-    Returns: List of dictionaries representing tasks for the employee.
-    """
-    api_url = f"https://jsonplaceholder.typicode.com/users/{employee_id}"
-    todo_url = f"https://jsonplaceholder.typicode.com/todos?" \
-               f"userId={employee_id}"
-
-    with urlopen(api_url) as response:
-        user_data = json.load(response)
-
-    with urlopen(todo_url) as response:
-        todo_data = json.load(response)
-
-    employee_name = user_data.get("username")
-    tasks = [
-        {"username": employee_name, "task": task["title"],
-         "completed": task["completed"]}
-        for task in todo_data
-    ]
-
-    return tasks
+def fetch_user_data(api_url, user_id):
+    user_data = requests.get(api_url + f"users/{user_id}").json()
+    user_tasks = requests.get(api_url + f"users/{user_id}/todos").json()
+    user_completed_tasks = [{"username": user_data["username"],
+                             "task": task["title"], "completed":
+                                 task["completed"]} for task in user_tasks]
+    return user_id, user_completed_tasks
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 1:
-        print("Usage: python3 script_name.py")
-        sys.exit(1)
+    api_url = "https://jsonplaceholder.typicode.com/"
 
-    all_tasks = {}
-    for employee_id in range(1, 11):
-        tasks = get_employee_todo_progress(employee_id)
-        all_tasks[str(employee_id)] = tasks
+    if len(argv) != 1:
+        print("Usage: python script.py")
+        exit(1)
 
-    with open("todo_all_employees.json", "w") as json_file:
-        json.dump(all_tasks, json_file, indent=2)
+    all_employees_tasks = {}
 
-    print("Data exported to todo_all_employees.json")
+    for user_id in range(1, 11):
+        user_id, user_completed_tasks = fetch_user_data(api_url, user_id)
+        all_employees_tasks[str(user_id)] = user_completed_tasks
+
+    output_file = "todo_all_employees.json"
+    with open(output_file, "w") as file:
+        json.dump(all_employees_tasks, file, indent=2)
