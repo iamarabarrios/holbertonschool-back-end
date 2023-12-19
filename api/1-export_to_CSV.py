@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-"""Exporta datos en formato CSV."""
+"""Export data in the CSV format."""
 
 import csv
 import requests
@@ -7,20 +7,26 @@ import sys
 
 
 if __name__ == "__main__":
-    if len(sys.argv) == 2:
+    if len(sys.argv) != 2:
+        pass
+    else:
         URL = "https://jsonplaceholder.typicode.com"
-        ID_EMPLEADO = sys.argv[1]
+        EMPLOYEE_ID = sys.argv[1]
 
-        respuesta = requests.get(f"{URL}/users/{ID_EMPLEADO}/todos", params={
-            "_expand": "user"})
-        datos = respuesta.json()
+        EMPLOYEE_TODOS = requests.get(f"{URL}/users/{EMPLOYEE_ID}/todos",
+                                      params={"_expand": "user"})
 
-        if datos:
-            NOMBRE_EMPLEADO = datos[0]["user"]["name"]
+        data = EMPLOYEE_TODOS.json()
 
-            with open(f"{ID_EMPLEADO}.csv", "w", newline="",
-                      encoding="utf-8") as csvfile:
-                csv_writer = csv.writer(csvfile, quoting=csv.QUOTE_NONNUMERIC)
-                for tarea in datos:
-                    csv_writer.writerow([ID_EMPLEADO, NOMBRE_EMPLEADO, tarea[
-                        "completed"], tarea["title"]])
+        EMPLOYEE_NAME = data[0]["user"]["username"]
+
+        fileName = f"{EMPLOYEE_ID}.csv"
+
+        with open(fileName, "w", newline="") as file:
+            writer = csv.writer(file, quoting=csv.QUOTE_NONNUMERIC)
+
+            for task in data:
+                writer.writerow(
+                    [EMPLOYEE_ID, EMPLOYEE_NAME, str(task["completed"]),
+                     task["title"]]
+                )
