@@ -30,15 +30,11 @@ def get_employee_todo_progress(employee_id):
     todo_url = f"https://jsonplaceholder.typicode.com/todos?" \
                f"userId={employee_id}"
 
-    try:
-        with urlopen(api_url) as response:
-            user_data = json.load(response)
+    with urlopen(api_url) as response:
+        user_data = json.load(response)
 
-        with urlopen(todo_url) as response:
-            todo_data = json.load(response)
-    except URLError as e:
-        print(f"Error connecting to API: {e}")
-        return []
+    with urlopen(todo_url) as response:
+        todo_data = json.load(response)
 
     if not todo_data:
         print(f"No tasks found for employee {employee_id}")
